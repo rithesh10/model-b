@@ -1,4 +1,4 @@
-import { db_name } from "../utils/constants.js";
+import { db_name } from "../constants.js";
 import mongoose from "mongoose";
 import express from "express"
 // const app=express();
