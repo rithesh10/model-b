@@ -5,7 +5,7 @@ import { uploadCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 const registerUser=asyncHandler( async (req,res)=>{
    const {fullname,email,username,password}=req.body;
-   console.log("email",email,"password",password);
+//    console.log("email",email,"password",password);
    
     if(
         [fullname,email,username,password].some((field)=> field?.trim()==="")
@@ -30,8 +30,13 @@ const registerUser=asyncHandler( async (req,res)=>{
      
 
     const avatarLocalpath=req.files?.avatar[0]?.path;
-    const coverImagepath=req.files?.coverImage[0]?.path;
-    console.log(req.files);
+    // const coverImagepath=req.files?.coverImage[0]?.path;
+    let coverImagepath=null;
+    if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length>0)
+    {
+        coverImagepath=req.files.coverImage[0].path;
+    }
+    // console.log(req.files);  
     if(!avatarLocalpath)
     {
         throw new ApiError(400,"Avatar is required");
@@ -52,9 +57,7 @@ const registerUser=asyncHandler( async (req,res)=>{
     username:username.toLowerCase()
 }
    )
-   const userCreated = await User.findOne({ 
-    $or: [{ email: user.email }, { username: user.username }]
- }).select("-password -refreshToken");
+   const userCreated = await User.findById(user._id).select("-password -refreshToken");
 
    if(!userCreated)
    {    
