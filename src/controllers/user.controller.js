@@ -14,13 +14,20 @@ const registerUser=asyncHandler( async (req,res)=>{
     {
         throw new ApiError(400,"All fields are required");
     }
-    const existeduser=User.findOne(
-        {$or:[{ email },{ username }]}
-    )
-    if(existeduser)
-    {
-        throw new ApiError(409,"User already exists");
-    }
+    try {
+        const existedUser = await User.findOne({
+           $or: [{ email }, { username }]
+        });
+     
+        if (existedUser) {
+            console.log('User already exists:', existedUser);
+        } else {
+            console.log('No existing user found.');
+        }
+     } catch (error) {
+        console.error('Error finding user:', error);
+     }
+     
 
     const avatarLocalpath=req.files?.avatar[0]?.path;
     const coverImagepath=req.files?.coverImage[0]?.path;
@@ -45,12 +52,16 @@ const registerUser=asyncHandler( async (req,res)=>{
     username:username.toLowerCase()
 }
    )
-   const userCreated=User.findById(user.email).select(
-    "-password -refreshToken"
-   )
+   const userCreated = await User.findOne({ 
+    $or: [{ email: user.email }, { username: user.username }]
+ }).select("-password -refreshToken");
+
    if(!userCreated)
-   {
+   {    
     throw new ApiError(500,"Something went wrong while registernig user")
+   }
+   else{
+    console.log("Succcess")
    }
    return res.status(201).json(new ApiResponse(200,userCreated,"User Registered Successfully"))
 })
